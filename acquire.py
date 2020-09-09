@@ -1,3 +1,6 @@
+import os
+import pandas as pd
+
 #defines function to create a sql url using personal credentials
 def get_db_url(db_name):
     
@@ -9,14 +12,16 @@ def get_db_url(db_name):
     return (url)
 
 def get_titanic_data():
+
     if os.path.isfile('titanic_df.csv') == False:
-        pd.read_sql('SELECT * FROM passengers', get_db_url('titanic_db'))
+        df = pd.read_sql('SELECT * FROM passengers', get_db_url('titanic_db'))
         df.to_csv('titanic_df.csv')
-    elif:
+    else:
         df = pd.read_csv('titanic_df.csv', index_col=0)
     return df
 
 def get_iris_data():
+
     if os.path.isfile('iris_df.csv') == False:
         sql_query = """
                     SELECT species_id,
@@ -31,7 +36,7 @@ def get_iris_data():
                     """
         df = pd.read_sql(sql_querry,get_db_url('iris_db'))
         df.to_csv('iris_df.csv')
-    elif:
+    else:
         df = pd.read_csv('iris_df.csv', index_col=0)
     return df
 
