@@ -13,18 +13,47 @@ def get_db_url(db_name):
 
 def get_titanic_data():
 
+    # if file note already saved in csv, will create the df to csv
     if os.path.isfile('titanic_df.csv') == False:
         df = pd.read_sql('SELECT * FROM passengers', get_db_url('titanic_db'))
         df.to_csv('titanic_df.csv')
+
+    #if already saved to csv file in computer
     else:
         df = pd.read_csv('titanic_df.csv', index_col=0)
     return df
 
+def prep_titanic(titanic_df):
+    # drop missing observations of embark town
+    titanic_df = titanic_df[~titanic_df.embark_town.isnull()]
+
+    #drop missing observations of embarked
+    titanic_df = titanic_df[~titanic_df.embarked.isnull()]
+    
+    #remove deck column
+    titanic_df = titanic_df.drop('deck',axis=1)
+    
+    #create dummy variables for embarked column
+    df_dummies = pd.get_dummies(titanic_df['embarked'],drop_first=1)
+    
+    #add dummy variables to original df
+    titanic_df = pd.concat([titanic_df, df_dummies], axis=1)
+    
+    #filling missing values in age with average age
+    mean_age = titanic_df.age.mean()
+    titanic_df.fillna(mean_age)
+    
+    return titanic_df
+
 def get_iris_data():
 
+    #if iris df not already saved to csv file
     if os.path.isfile('iris_df.csv') == False:
+
+        # the sql querry which chooses the data uploaded to csv/df
         sql_query = """
                     SELECT species_id,
+                    measurement_id,
                     species_name,
                     sepal_length,
                     sepal_width,
@@ -34,9 +63,27 @@ def get_iris_data():
                     JOIN species
                     USING(species_id)
                     """
-        df = pd.read_sql(sql_querry,get_db_url('iris_db'))
+        #saves to df then csv
+        df = pd.read_sql(sql_query,get_db_url('iris_db'))
         df.to_csv('iris_df.csv')
+    
+    #if already saved to csv in computer
     else:
         df = pd.read_csv('iris_df.csv', index_col=0)
     return df
 
+def prep_iris(iris_df):
+    #removing soecies_id column
+    iris_df = iris_df.drop('species_id',axis=1)
+    
+    #dropping measurement_id column
+    iris_df = iris_df.drop('measurement_id',axis=1)
+    
+    #renaming species column
+    iris_df = iris_df.rename({'species_name':'species'},axis=1)
+    
+    #creating dummy variables for species names and add to df
+    df_dummies = pd.get_dummies(iris_df['species'], drop_first=True)
+    iris_df = pd.concat([iris_df, df_dummies], axis=1)
+    
+    return iris_df
