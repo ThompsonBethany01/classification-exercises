@@ -40,8 +40,8 @@ def prep_titanic(titanic_df):
     titanic_df = pd.concat([titanic_df, df_dummies], axis=1)
     
     #filling missing values in age with average age
-    mean_age = titanic_df.age.mean()
-    titanic_df.fillna(mean_age)
+    mode_age = titanic_df.age.mode().iloc[0]
+    titanic_df['age'] = titanic_df.age.fillna(mode_age)
     
     return titanic_df
 
